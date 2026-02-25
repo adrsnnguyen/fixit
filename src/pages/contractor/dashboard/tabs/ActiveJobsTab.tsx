@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Zap, MessageSquare } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { supabase } from '../../../../lib/supabase'
@@ -10,6 +11,7 @@ import type { Job } from '../../../../types/database'
 
 export function ActiveJobsTab() {
   const { contractor } = useContractor()
+  const navigate = useNavigate()
   const [jobs, setJobs] = useState<Job[]>([])
   const [loading, setLoading] = useState(true)
   const [completing, setCompleting] = useState<string | null>(null)
@@ -37,7 +39,7 @@ export function ActiveJobsTab() {
       .from('jobs')
       .select('*')
       .in('id', jobIds)
-      .eq('status', 'active')
+      .in('status', ['matched', 'active'])
       .order('created_at', { ascending: false })
 
     setJobs(data ?? [])
@@ -58,7 +60,7 @@ export function ActiveJobsTab() {
     if (error) {
       toast.error(error.message)
     } else {
-      toast.success('Job marked as complete!')
+      toast.success('Marked as complete. Waiting for homeowner confirmation.')
       setJobs((prev) => prev.filter((j) => j.id !== jobId))
     }
     setCompleting(null)
@@ -109,7 +111,7 @@ export function ActiveJobsTab() {
               {completing === job.id ? 'Marking…' : 'Mark as Complete'}
             </button>
             <button
-              onClick={() => toast('Messaging coming soon')}
+              onClick={() => navigate(`/chat/${job.id}`)}
               className="px-4 py-2 border border-border text-muted text-sm font-medium rounded-xl hover:border-foreground hover:text-foreground transition-colors"
             >
               <MessageSquare className="w-4 h-4" />

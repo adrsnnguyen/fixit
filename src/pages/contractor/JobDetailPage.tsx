@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, CheckCircle } from 'lucide-react'
+import { ArrowLeft, CheckCircle, MessageSquare } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { supabase } from '../../lib/supabase'
 import { useContractor } from '../../contexts/ContractorContext'
@@ -22,6 +22,7 @@ export default function JobDetailPage() {
   const [job, setJob] = useState<JobWithProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [alreadyQuoted, setAlreadyQuoted] = useState(false)
+  const [aiMatchReason, setAiMatchReason] = useState<string | null>(null)
 
   // Quote form state
   const [priceDollars, setPriceDollars] = useState('')
@@ -35,7 +36,7 @@ export default function JobDetailPage() {
     const fetchData = async () => {
       setLoading(true)
 
-      const [jobResult, quoteResult] = await Promise.all([
+      const [jobResult, quoteResult, matchResult] = await Promise.all([
         supabase
           .from('jobs')
           .select(
@@ -46,6 +47,12 @@ export default function JobDetailPage() {
         supabase
           .from('quotes')
           .select('id, status')
+          .eq('job_id', jobId)
+          .eq('contractor_id', contractor.id)
+          .maybeSingle(),
+        supabase
+          .from('ai_matches')
+          .select('reason')
           .eq('job_id', jobId)
           .eq('contractor_id', contractor.id)
           .maybeSingle(),
@@ -62,6 +69,10 @@ export default function JobDetailPage() {
 
       if (quoteResult.data) {
         setAlreadyQuoted(true)
+      }
+
+      if (matchResult.data?.reason) {
+        setAiMatchReason(matchResult.data.reason)
       }
 
       setLoading(false)
@@ -158,6 +169,17 @@ export default function JobDetailPage() {
           </div>
         </div>
 
+        {/* AI match reason callout */}
+        {aiMatchReason && (
+          <div className="bg-warning/5 border border-warning/25 rounded-2xl p-4 flex items-start gap-3">
+            <span className="text-lg shrink-0">💡</span>
+            <div>
+              <p className="text-sm font-semibold text-foreground mb-0.5">Matched because</p>
+              <p className="text-sm text-muted leading-relaxed">{aiMatchReason}</p>
+            </div>
+          </div>
+        )}
+
         {/* Photos */}
         {job.photos && job.photos.length > 0 && (
           <div>
@@ -176,14 +198,22 @@ export default function JobDetailPage() {
 
         {/* Quote sent banner or form */}
         {alreadyQuoted ? (
-          <div className="bg-success/5 border border-success/30 rounded-2xl p-4 flex items-center gap-3">
-            <CheckCircle className="w-5 h-5 text-success shrink-0" />
-            <div>
-              <p className="font-semibold text-success">Quote sent</p>
-              <p className="text-xs text-muted mt-0.5">
-                You've already submitted a quote for this job.
-              </p>
+          <div className="bg-success/5 border border-success/30 rounded-2xl p-4">
+            <div className="flex items-center gap-3">
+              <CheckCircle className="w-5 h-5 text-success shrink-0" />
+              <div>
+                <p className="font-semibold text-success">Quote sent</p>
+                <p className="text-xs text-muted mt-0.5">
+                  You've already submitted a quote for this job.
+                </p>
+              </div>
             </div>
+            <button
+              onClick={() => navigate(`/chat/${jobId}`)}
+              className="w-full mt-3 py-2 border border-border text-sm font-medium text-foreground rounded-xl hover:border-primary hover:text-primary transition-colors flex items-center justify-center gap-2"
+            >
+              <MessageSquare className="w-4 h-4" /> Message Homeowner
+            </button>
           </div>
         ) : (
           <div className="bg-surface border border-border rounded-2xl p-4 space-y-4">

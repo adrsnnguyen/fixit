@@ -6,6 +6,7 @@ import { useAuth } from '../../../contexts/AuthContext'
 import { UrgencyBadge } from '../../../components/UrgencyBadge'
 import { PhotoGallery } from '../../../components/PhotoGallery'
 import { formatPrice } from '../../../utils/pricing'
+import { runAiMatching } from '../../../utils/aiMatching'
 import { CATEGORY_LABELS } from './categories'
 import type { JobDraft } from './PostJobPage'
 
@@ -38,7 +39,7 @@ export function Step5Confirm({ draft, onBack }: Props) {
     }
 
     // 2. Insert job
-    const { error } = await supabase.from('jobs').insert({
+    const { data: insertedJobs, error } = await supabase.from('jobs').insert({
       homeowner_id: user.id,
       category: draft.category,
       title: CATEGORY_LABELS[draft.category] ?? draft.category,
@@ -51,12 +52,17 @@ export function Step5Confirm({ draft, onBack }: Props) {
       address: draft.address || null,
       photos: draft.photos,
       city_id: cityData.id,
-    })
+    }).select('id')
 
     if (error) {
       toast.error(error.message)
       setPosting(false)
       return
+    }
+
+    const jobId = (insertedJobs as { id: string }[])?.[0]?.id
+    if (jobId) {
+      runAiMatching(jobId, draft.category, draft.description, draft.urgency!, draft.zip_code)
     }
 
     toast.success('Job posted!')

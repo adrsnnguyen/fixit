@@ -12,6 +12,7 @@ export function AvailableJobsTab() {
   const navigate = useNavigate()
   const [jobs, setJobs] = useState<Job[]>([])
   const [loading, setLoading] = useState(true)
+  const [aiMatchBannerVisible, setAiMatchBannerVisible] = useState(false)
 
   useEffect(() => {
     if (!contractor) return
@@ -43,6 +44,46 @@ export function AvailableJobsTab() {
     fetchJobs()
   }, [contractor])
 
+  useEffect(() => {
+    if (!contractor) return
+
+    // Check if there are any recent AI matches (last 24h)
+    const checkAiMatches = async () => {
+      const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+      const { data } = await supabase
+        .from('ai_matches')
+        .select('id')
+        .eq('contractor_id', contractor.id)
+        .gte('created_at', since)
+        .limit(1)
+
+      if (data && data.length > 0) {
+        setAiMatchBannerVisible(true)
+      }
+    }
+
+    checkAiMatches()
+
+    // Subscribe to new AI matches in real-time
+    const channel = supabase
+      .channel(`ai_matches_${contractor.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'ai_matches',
+          filter: `contractor_id=eq.${contractor.id}`,
+        },
+        () => setAiMatchBannerVisible(true),
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [contractor])
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -63,6 +104,17 @@ export function AvailableJobsTab() {
 
   return (
     <div className="px-4 py-4 space-y-3">
+      {aiMatchBannerVisible && (
+        <div className="bg-primary/5 border border-primary/20 rounded-2xl p-3 flex items-center justify-between gap-2">
+          <p className="text-sm text-primary font-medium">✨ New job matched to you!</p>
+          <button
+            onClick={() => setAiMatchBannerVisible(false)}
+            className="text-muted text-xs font-medium"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
       <p className="text-xs text-muted font-medium px-1">
         {jobs.length} job{jobs.length !== 1 ? 's' : ''} available
       </p>

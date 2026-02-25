@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Star, Phone, X } from 'lucide-react'
+import { ArrowLeft, Star, Phone, X, MessageSquare } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
@@ -51,6 +51,7 @@ export default function HomeownerJobDetailPage() {
   // Confirmation modal state
   const [confirmQuote, setConfirmQuote] = useState<QuoteWithContractor | null>(null)
   const [accepting, setAccepting] = useState(false)
+  const [paymentConfirmed, setPaymentConfirmed] = useState(false)
 
   useEffect(() => {
     if (!jobId || !user) return
@@ -154,6 +155,32 @@ export default function HomeownerJobDetailPage() {
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-4 pb-8 space-y-5">
+        {/* Payment confirmation banner */}
+        {job.status === 'completed' && !paymentConfirmed && (
+          <div className="bg-warning/5 border border-warning/30 rounded-2xl p-4 space-y-3">
+            <p className="text-sm font-semibold text-foreground">
+              Your contractor marked this job complete. Please confirm to release payment.
+            </p>
+            <button
+              onClick={() => {
+                setPaymentConfirmed(true)
+                toast.success('Payment released! 💸')
+              }}
+              className="w-full py-2.5 bg-warning text-white text-sm font-semibold rounded-xl hover:opacity-90 active:scale-[0.98] transition-all"
+            >
+              Confirm Complete
+            </button>
+            <p className="text-xs text-muted text-center">
+              Auto-confirms in 48 hours if no action taken
+            </p>
+          </div>
+        )}
+        {job.status === 'completed' && paymentConfirmed && (
+          <div className="bg-success/5 border border-success/30 rounded-2xl p-3 text-center">
+            <p className="text-sm font-semibold text-success">✅ Payment Released</p>
+          </div>
+        )}
+
         {/* Job summary */}
         <div className="bg-surface border border-border rounded-2xl p-4 space-y-3">
           <p className="text-sm text-foreground leading-relaxed">{job.description}</p>
@@ -231,14 +258,24 @@ export default function HomeownerJobDetailPage() {
 
                   {/* Status / actions */}
                   {isAccepted && (
-                    <div className="bg-success/10 border border-success/30 rounded-xl p-3 flex items-center gap-2">
-                      <Phone className="w-4 h-4 text-success shrink-0" />
-                      <div>
-                        <p className="text-xs font-semibold text-success">Quote accepted!</p>
-                        {c.phone && (
-                          <p className="text-xs text-success/80 mt-0.5">Contact: {c.phone}</p>
-                        )}
+                    <div className="space-y-2">
+                      <div className="bg-success/10 border border-success/30 rounded-xl p-3 flex items-center gap-2">
+                        <Phone className="w-4 h-4 text-success shrink-0" />
+                        <div>
+                          <p className="text-xs font-semibold text-success">Quote accepted!</p>
+                          {c.phone && (
+                            <p className="text-xs text-success/80 mt-0.5">Contact: {c.phone}</p>
+                          )}
+                        </div>
                       </div>
+                      {['matched', 'active', 'completed'].includes(job.status) && (
+                        <button
+                          onClick={() => navigate(`/chat/${job.id}`)}
+                          className="w-full py-2.5 border border-primary/30 text-primary text-sm font-medium rounded-xl hover:bg-primary/5 transition-colors flex items-center justify-center gap-2"
+                        >
+                          <MessageSquare className="w-4 h-4" /> Message Contractor
+                        </button>
+                      )}
                     </div>
                   )}
 

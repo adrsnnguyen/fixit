@@ -17,6 +17,8 @@ import JobDetailPage from './pages/contractor/JobDetailPage'
 import HomeownerDashboard from './pages/homeowner/dashboard/HomeownerDashboard'
 import PostJobPage from './pages/homeowner/post-job/PostJobPage'
 import HomeownerJobDetailPage from './pages/homeowner/HomeownerJobDetailPage'
+import ChatPage from './pages/chat/ChatPage'
+import { RatingGate } from './components/RatingGate'
 
 /** Layout route that protects contractor-specific pages and provides ContractorContext */
 function ContractorLayout() {
@@ -44,6 +46,7 @@ export default function App() {
             },
           }}
         />
+        <RatingGate>
         <Routes>
           {/* Root redirect */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
@@ -105,9 +108,20 @@ export default function App() {
             }
           />
 
+          {/* Chat — accessible by both roles */}
+          <Route
+            path="/chat/:jobId"
+            element={
+              <ProtectedRoute>
+                <ChatPage />
+              </ProtectedRoute>
+            }
+          />
+
           {/* Catch-all */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        </RatingGate>
       </AuthProvider>
     </BrowserRouter>
   )

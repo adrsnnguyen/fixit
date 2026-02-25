@@ -79,6 +79,13 @@ export interface Rating {
   rating: number
   comment: string | null
   created_at: string
+  rater_role: 'homeowner' | 'contractor'
+  on_time: boolean | null
+  price_accurate: boolean | null
+  would_hire_again: boolean | null
+  clear_instructions: boolean | null
+  payment_smooth: boolean | null
+  professional_interaction: boolean | null
 }
 
 export interface City {
@@ -117,4 +124,20 @@ export interface QuoteWithContractor extends Quote {
     | 'rating_avg'
     | 'phone'
   >
+}
+
+export interface Message {
+  id: string
+  job_id: string
+  sender_id: string
+  content: string
+  created_at: string
+}
+
+export interface AiMatch {
+  id: string
+  job_id: string
+  contractor_id: string
+  reason: string
+  created_at: string
 }
