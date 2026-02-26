@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
-import { Wrench } from 'lucide-react'
+import { Wrench, MailCheck } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
@@ -12,6 +12,7 @@ export default function SignupPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [confirmationSent, setConfirmationSent] = useState(false)
 
   // Already logged in — redirect away
   if (!loading && session) {
@@ -28,11 +29,12 @@ export default function SignupPage() {
 
     setSubmitting(true)
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: { full_name: fullName },
+        emailRedirectTo: `${window.location.origin}/auth/role-select`,
       },
     })
 
@@ -42,7 +44,43 @@ export default function SignupPage() {
       return
     }
 
+    // If session is null, Supabase requires email confirmation first
+    if (!data.session) {
+      setConfirmationSent(true)
+      setSubmitting(false)
+      return
+    }
+
+    // Email confirmation is disabled — session is live, proceed directly
     navigate('/auth/role-select', { replace: true })
+  }
+
+  // ── Email confirmation pending screen ─────────────────────────────────────
+  if (confirmationSent) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col justify-center px-6 py-12">
+        <div className="mx-auto w-full max-w-sm text-center space-y-5">
+          <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto">
+            <MailCheck className="w-8 h-8 text-primary" />
+          </div>
+          <h1 className="text-2xl font-bold text-foreground">Check your email</h1>
+          <p className="text-muted text-sm leading-relaxed">
+            We sent a confirmation link to{' '}
+            <span className="font-semibold text-foreground">{email}</span>. Click
+            it to verify your account and finish setting up your profile.
+          </p>
+          <p className="text-xs text-muted">
+            Didn't get it? Check your spam folder.
+          </p>
+          <Link
+            to="/login"
+            className="block text-sm text-primary font-medium hover:underline"
+          >
+            Back to sign in
+          </Link>
+        </div>
+      </div>
+    )
   }
 
   return (

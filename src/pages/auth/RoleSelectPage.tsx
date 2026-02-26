@@ -37,7 +37,16 @@ export default function RoleSelectPage() {
   const [selected, setSelected] = useState<Exclude<UserRole, null> | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
-  if (!loading && !session) {
+  // Show spinner while session is resolving (e.g. after email confirmation redirect)
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+      </div>
+    )
+  }
+
+  if (!session) {
     return <Navigate to="/login" replace />
   }
 

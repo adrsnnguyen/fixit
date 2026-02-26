@@ -24,7 +24,11 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
 
     if (error) {
-      toast.error(error.message)
+      if (error.message.toLowerCase().includes('email not confirmed')) {
+        toast.error('Please confirm your email first — check your inbox.')
+      } else {
+        toast.error(error.message)
+      }
       setSubmitting(false)
       return
     }
