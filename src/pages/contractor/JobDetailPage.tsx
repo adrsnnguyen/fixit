@@ -7,6 +7,7 @@ import { useContractor } from '../../contexts/ContractorContext'
 import { PhotoGallery } from '../../components/PhotoGallery'
 import { TrustCard } from '../../components/TrustCard'
 import { UrgencyBadge } from '../../components/UrgencyBadge'
+import { EmptyState } from '../../components/EmptyState'
 import { formatPrice, contractorPayout } from '../../utils/pricing'
 import type { JobWithProfile, Availability } from '../../types/database'
 
@@ -125,7 +126,11 @@ export default function JobDetailPage() {
   if (!job) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center px-6">
-        <p className="text-muted text-center">Job not found.</p>
+        <EmptyState
+          icon={<span className="text-2xl">🔍</span>}
+          heading="Job not found"
+          body="This job may have been removed or is no longer available."
+        />
       </div>
     )
   }

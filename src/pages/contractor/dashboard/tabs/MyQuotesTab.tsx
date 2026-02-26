@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { FileText } from 'lucide-react'
+import toast from 'react-hot-toast'
 import { supabase } from '../../../../lib/supabase'
 import { useContractor } from '../../../../contexts/ContractorContext'
 import { Badge } from '../../../../components/Badge'
@@ -23,12 +24,13 @@ export function MyQuotesTab() {
 
     const fetchQuotes = async () => {
       setLoading(true)
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('quotes')
         .select('*, job:jobs(title, category, status)')
         .eq('contractor_id', contractor.id)
         .order('created_at', { ascending: false })
 
+      if (error) toast.error('Failed to load quotes')
       setQuotes((data as QuoteWithJob[]) ?? [])
       setLoading(false)
     }

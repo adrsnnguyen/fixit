@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Send } from 'lucide-react'
+import toast from 'react-hot-toast'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
 import type { Message } from '../../types/database'
@@ -110,6 +111,7 @@ export default function ChatPage() {
 
     if (error) {
       setInputText(content) // restore on error
+      toast.error('Failed to send message')
     }
 
     setSending(false)

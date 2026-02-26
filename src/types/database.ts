@@ -7,6 +7,7 @@ export type JobStatus = 'open' | 'matched' | 'active' | 'completed' | 'cancelled
 export type Urgency = 'ASAP' | 'This Week' | 'Flexible'
 export type QuoteStatus = 'pending' | 'accepted' | 'rejected'
 export type Availability = 'Today' | 'Tomorrow' | 'This Week' | 'Flexible'
+export type CityStatus = 'live' | 'pre_launch' | 'waitlisted'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Table interfaces
@@ -93,6 +94,28 @@ export interface City {
   name: string
   state: string
   zip_codes: string[]
+  status: CityStatus
+}
+
+export interface CityLaunchThreshold {
+  city_id: string
+  homeowner_target: number
+  contractor_target: number
+  homeowner_current: number
+  contractor_current: number
+  updated_at: string
+}
+
+export interface CityWithThreshold extends City {
+  threshold: CityLaunchThreshold | null
+}
+
+export interface Waitlist {
+  id: string
+  email: string
+  zip_code: string
+  role: 'homeowner' | 'contractor'
+  created_at: string
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

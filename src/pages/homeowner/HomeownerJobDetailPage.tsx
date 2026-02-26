@@ -7,6 +7,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { UrgencyBadge } from '../../components/UrgencyBadge'
 import { PhotoGallery } from '../../components/PhotoGallery'
 import { Badge } from '../../components/Badge'
+import { EmptyState } from '../../components/EmptyState'
 import { formatPrice, calculatePlatformFee } from '../../utils/pricing'
 import { CATEGORY_LABELS } from './post-job/categories'
 import type { Job, QuoteWithContractor, VerificationStatus } from '../../types/database'
@@ -131,7 +132,11 @@ export default function HomeownerJobDetailPage() {
   if (!job) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center px-6">
-        <p className="text-muted text-center">Job not found.</p>
+        <EmptyState
+          icon={<span className="text-2xl">🔍</span>}
+          heading="Job not found"
+          body="This job may have been removed or you don't have access to it."
+        />
       </div>
     )
   }

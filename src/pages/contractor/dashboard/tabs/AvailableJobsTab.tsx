@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Briefcase } from 'lucide-react'
+import toast from 'react-hot-toast'
 import { supabase } from '../../../../lib/supabase'
 import { useContractor } from '../../../../contexts/ContractorContext'
 import { JobCard } from '../../../../components/JobCard'
@@ -36,7 +37,8 @@ export function AvailableJobsTab() {
         query = query.in('zip_code', contractor.service_zip_codes)
       }
 
-      const { data } = await query
+      const { data, error } = await query
+      if (error) toast.error('Failed to load jobs')
       setJobs(data ?? [])
       setLoading(false)
     }

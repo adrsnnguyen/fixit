@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { DollarSign, Info } from 'lucide-react'
+import toast from 'react-hot-toast'
 import { supabase } from '../../../../lib/supabase'
 import { useContractor } from '../../../../contexts/ContractorContext'
 import { EmptyState } from '../../../../components/EmptyState'
@@ -19,13 +20,14 @@ export function EarningsTab() {
       const now = new Date()
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
 
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('quotes')
         .select('amount_cents')
         .eq('contractor_id', contractor.id)
         .eq('status', 'accepted')
         .gte('created_at', startOfMonth)
 
+      if (error) toast.error('Failed to load earnings')
       if (data) {
         const total = data.reduce(
           (sum: number, q: { amount_cents: number }) =>
