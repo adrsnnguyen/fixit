@@ -125,6 +125,18 @@ export function ProfileTab() {
 
   return (
     <div className="px-4 py-4 space-y-4">
+      {/* New Pro boost banner */}
+      {contractor.rating_count < 5 && (
+        <div className="bg-primary/10 border border-primary/20 rounded-2xl p-4">
+          <p className="text-sm font-semibold text-primary">
+            🚀 New Pro boost active — you're being shown to more homeowners.
+          </p>
+          <p className="text-xs text-primary/70 mt-1">
+            {5 - contractor.rating_count} job{5 - contractor.rating_count !== 1 ? 's' : ''} until you compete on reviews alone.
+          </p>
+        </div>
+      )}
+
       {/* Header card */}
       <div className="bg-surface border border-border rounded-2xl p-4">
         <div className="flex items-start justify-between gap-2 mb-3">

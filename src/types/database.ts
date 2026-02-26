@@ -145,6 +145,7 @@ export interface QuoteWithContractor extends Quote {
     | 'profile_photo_url'
     | 'verification_status'
     | 'rating_avg'
+    | 'rating_count'
     | 'phone'
   >
 }

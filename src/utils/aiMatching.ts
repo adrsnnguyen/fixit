@@ -34,7 +34,21 @@ export async function runAiMatching(
     candidates = candidates.slice(0, 10)
     if (candidates.length === 0) return
 
-    // 3. Call Claude Haiku for top 3
+    // 3. Pre-identify a New Pro candidate (rating_count < 5)
+    const newProCandidate = candidates.find((c) => (c.rating_count ?? 0) < 5) ?? null
+
+    // 4. Call Claude Haiku for top 3
+    const candidateList = candidates
+      .map((c) => {
+        const isNewPro = (c.rating_count ?? 0) < 5
+        return `- id: ${c.id}, name: ${c.full_name}${isNewPro ? ' [NEW PRO]' : ''}, trades: ${(c.trade_types ?? []).join(', ')}, rating: ${c.rating_avg ?? 'N/A'} (${c.rating_count ?? 0} reviews), bio: ${c.bio ?? ''}`
+      })
+      .join('\n')
+
+    const newProInstruction = newProCandidate
+      ? `\nIMPORTANT: One of your 3 matches MUST be a contractor marked [NEW PRO] (rating_count < 5) if one exists. This is the "New Pro" slot — it gives newer contractors fair exposure alongside established ones.\n`
+      : ''
+
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -50,7 +64,7 @@ export async function runAiMatching(
           {
             role: 'user',
             content: `You are a contractor matching engine. Given a job and a list of contractors, select the top 3 best matches.
-
+${newProInstruction}
 Job details:
 - Category: ${category}
 - Description: ${description}
@@ -58,7 +72,7 @@ Job details:
 - Zip code: ${zipCode}
 
 Contractors:
-${candidates.map((c) => `- id: ${c.id}, name: ${c.full_name}, trades: ${(c.trade_types ?? []).join(', ')}, rating: ${c.rating_avg ?? 'N/A'} (${c.rating_count ?? 0} reviews), bio: ${c.bio ?? ''}`).join('\n')}
+${candidateList}
 
 Respond ONLY with valid JSON in this exact format (no explanation, no markdown):
 {"matches":[{"contractor_id":"uuid","reason":"brief 1-sentence reason"},{"contractor_id":"uuid","reason":"brief 1-sentence reason"},{"contractor_id":"uuid","reason":"brief 1-sentence reason"}]}`,
@@ -77,16 +91,26 @@ Respond ONLY with valid JSON in this exact format (no explanation, no markdown):
       .trim()
 
     const parsed = JSON.parse(cleaned) as { matches: { contractor_id: string; reason: string }[] }
-    const matches = parsed.matches ?? []
+    let matches = parsed.matches ?? []
     if (matches.length === 0) return
 
-    await supabase.from('ai_matches').insert(
-      matches.map((m) => ({
+    // 5. Post-Claude slot ordering: move New Pro match to last (slot 3)
+    if (newProCandidate) {
+      const newProMatchIdx = matches.findIndex((m) => m.contractor_id === newProCandidate.id)
+      if (newProMatchIdx !== -1 && newProMatchIdx !== matches.length - 1) {
+        const [newProMatch] = matches.splice(newProMatchIdx, 1)
+        matches = [...matches, newProMatch]
+      }
+    }
+
+    // 6. Insert sequentially so created_at preserves slot order
+    for (const m of matches) {
+      await supabase.from('ai_matches').insert({
         job_id: jobId,
         contractor_id: m.contractor_id,
         reason: m.reason,
-      })),
-    )
+      })
+    }
   } catch {
     // silent fail — non-blocking feature
   }

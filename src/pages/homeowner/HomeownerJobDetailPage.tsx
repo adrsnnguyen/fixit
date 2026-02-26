@@ -1,44 +1,16 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Star, Phone, X, MessageSquare } from 'lucide-react'
+import { ArrowLeft, Phone, X, MessageSquare } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
 import { UrgencyBadge } from '../../components/UrgencyBadge'
 import { PhotoGallery } from '../../components/PhotoGallery'
-import { Badge } from '../../components/Badge'
 import { EmptyState } from '../../components/EmptyState'
+import { ContractorBadges } from '../../components/ContractorBadges'
 import { formatPrice, calculatePlatformFee } from '../../utils/pricing'
 import { CATEGORY_LABELS } from './post-job/categories'
-import type { Job, QuoteWithContractor, VerificationStatus } from '../../types/database'
-
-const VERIFICATION_LABEL: Record<VerificationStatus, string> = {
-  pending: 'Under review',
-  verified: 'Verified',
-  rejected: 'Rejected',
-}
-
-const VERIFICATION_VARIANT: Record<VerificationStatus, 'warning' | 'success' | 'danger'> = {
-  pending: 'warning',
-  verified: 'success',
-  rejected: 'danger',
-}
-
-function StarRating({ avg }: { avg: number | null }) {
-  if (!avg) return <span className="text-xs text-muted">No ratings</span>
-  return (
-    <div className="flex items-center gap-0.5">
-      {Array.from({ length: 5 }, (_, i) => (
-        <Star
-          key={i}
-          className="w-3.5 h-3.5"
-          style={i < Math.round(avg) ? { fill: 'var(--color-warning)', color: 'var(--color-warning)' } : { color: 'var(--color-border)' }}
-        />
-      ))}
-      <span className="text-xs font-medium text-foreground ml-1">{avg.toFixed(1)}</span>
-    </div>
-  )
-}
+import type { Job, QuoteWithContractor } from '../../types/database'
 
 export default function HomeownerJobDetailPage() {
   const { jobId } = useParams<{ jobId: string }>()
@@ -60,19 +32,38 @@ export default function HomeownerJobDetailPage() {
     const fetchData = async () => {
       setLoading(true)
 
-      const [jobResult, quotesResult] = await Promise.all([
+      const [jobResult, quotesResult, aiMatchResult] = await Promise.all([
         supabase.from('jobs').select('*').eq('id', jobId).single(),
         supabase
           .from('quotes')
           .select(
-            '*, contractor:contractors(id, full_name, profile_photo_url, verification_status, rating_avg, phone)',
+            '*, contractor:contractors(id, full_name, profile_photo_url, verification_status, rating_avg, rating_count, phone)',
           )
+          .eq('job_id', jobId),
+        supabase
+          .from('ai_matches')
+          .select('contractor_id')
           .eq('job_id', jobId)
-          .order('amount_cents', { ascending: true }),
+          .order('created_at', { ascending: true }),
       ])
 
       if (jobResult.data) setJob(jobResult.data as Job)
-      if (quotesResult.data) setQuotes(quotesResult.data as QuoteWithContractor[])
+
+      const aiMatchData = (aiMatchResult.data ?? []) as { contractor_id: string }[]
+
+      if (quotesResult.data) {
+        const fetchedQuotes = quotesResult.data as QuoteWithContractor[]
+        const matchOrder = aiMatchData.map((m) => m.contractor_id)
+        fetchedQuotes.sort((a, b) => {
+          const ai = matchOrder.indexOf(a.contractor_id)
+          const bi = matchOrder.indexOf(b.contractor_id)
+          if (ai === -1 && bi === -1) return 0
+          if (ai === -1) return 1
+          if (bi === -1) return -1
+          return ai - bi
+        })
+        setQuotes(fetchedQuotes)
+      }
 
       setLoading(false)
     }
@@ -238,13 +229,17 @@ export default function HomeownerJobDetailPage() {
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <p className="font-semibold text-foreground text-sm">{c.full_name}</p>
-                        <Badge variant={VERIFICATION_VARIANT[c.verification_status]}>
-                          {VERIFICATION_LABEL[c.verification_status]}
-                        </Badge>
-                      </div>
-                      <StarRating avg={c.rating_avg} />
+                      <p className="font-semibold text-foreground text-sm mb-1">{c.full_name}</p>
+                      <ContractorBadges
+                        rating_count={c.rating_count}
+                        rating_avg={c.rating_avg}
+                        verification_status={c.verification_status}
+                      />
+                      {c.rating_count < 5 && (
+                        <p className="text-xs text-muted mt-1">
+                          New to FixIt — building their reputation with competitive pricing
+                        </p>
+                      )}
                     </div>
                     <p className="text-base font-bold text-foreground shrink-0">
                       {formatPrice(quote.amount_cents / 100)}
