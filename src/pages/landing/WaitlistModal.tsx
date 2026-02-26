@@ -109,17 +109,16 @@ export function WaitlistModal({ role, onClose }: WaitlistModalProps) {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Zip code <span className="text-red-500">*</span>
+                  Postal code <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   required
-                  inputMode="numeric"
-                  pattern="[0-9]{5}"
-                  maxLength={5}
+                  pattern="[A-Za-z][0-9][A-Za-z] ?[0-9][A-Za-z][0-9]"
+                  maxLength={7}
                   value={zipCode}
                   onChange={(e) => setZipCode(e.target.value)}
-                  placeholder="78701"
+                  placeholder="V6B 2R9"
                   className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
                 />
               </div>

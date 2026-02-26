@@ -100,7 +100,7 @@ export function ProfileTab() {
       .slice(0, 5)
 
     if (zips.length === 0) {
-      return toast.error('Add at least one zip code')
+      return toast.error('Add at least one postal code')
     }
 
     setSaving(true)
@@ -221,13 +221,13 @@ export function ProfileTab() {
           {/* Zip codes */}
           <div>
             <label className="block text-sm font-medium text-foreground mb-1.5">
-              Service zip codes
+              Service postal codes
             </label>
             <input
               type="text"
               value={zipInput}
               onChange={(e) => setZipInput(e.target.value)}
-              placeholder="90210, 90211"
+              placeholder="V6B 2R9, V5K 1B3"
               className="w-full px-3 py-2.5 rounded-xl border border-border bg-background text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-sm"
             />
             <p className="text-xs text-muted mt-1">Comma-separated, up to 5</p>

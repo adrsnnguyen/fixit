@@ -19,7 +19,7 @@ Description: ${draft.description}
 Location (zip): ${draft.zip_code}
 Urgency: ${draft.urgency}
 
-Estimate a fair price range for this job. Consider typical labor and materials costs in the US.
+Estimate a fair price range for this job. Consider typical labor and materials costs in Vancouver, BC, Canada.
 
 Respond with ONLY valid JSON in exactly this format, no other text:
 {"min_cents": 15000, "max_cents": 35000, "basis": "Typical cost includes labor and basic materials."}`

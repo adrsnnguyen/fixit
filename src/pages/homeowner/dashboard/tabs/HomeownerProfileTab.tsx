@@ -117,7 +117,7 @@ export function HomeownerProfileTab() {
                 type="tel"
                 value={editPhone}
                 onChange={(e) => setEditPhone(e.target.value)}
-                placeholder="+1 (555) 000-0000"
+                placeholder="(604) 555-0000"
                 className="w-full px-3 py-2.5 rounded-xl border border-border bg-background text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-sm"
               />
             </div>

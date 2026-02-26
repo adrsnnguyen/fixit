@@ -29,7 +29,7 @@ export function Step5Confirm({ draft, onBack }: Props) {
     const { data: cityData } = await supabase
       .from('cities')
       .select('id')
-      .eq('name', 'Austin')
+      .eq('name', 'Vancouver')
       .maybeSingle()
 
     if (!cityData) {
@@ -100,7 +100,7 @@ export function Step5Confirm({ draft, onBack }: Props) {
             </div>
           )}
           <div>
-            <span className="text-muted">Zip: </span>
+            <span className="text-muted">Postal code: </span>
             <span className="text-foreground font-medium">{draft.zip_code}</span>
           </div>
         </div>

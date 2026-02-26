@@ -1,7 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(cd \"C:\\\\Users\\\\Anderson\\\\Desktop\\\\fixit\" && npm run build 2>&1)"
+      "Bash(cd \"C:\\\\Users\\\\Anderson\\\\Desktop\\\\fixit\" && npm run build 2>&1)",
+      "Bash(cd \"C:\\\\Users\\\\Anderson\\\\Desktop\\\\fixit\" && git push origin main 2>&1)",
+      "Bash(cd C:\\\\Users\\\\Anderson\\\\Desktop\\\\fixit:*)",
+      "Bash(cd /c/Users/Anderson/Desktop/fixit && npm run build 2>&1)",
+      "Bash(cd:*)",
+      "Bash(cd /c/Users/Anderson/Desktop/fixit && vercel --version 2>&1)"
     ]
   }
 }

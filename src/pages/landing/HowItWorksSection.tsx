@@ -26,10 +26,10 @@ export function HowItWorksSection() {
         <div className="grid sm:grid-cols-3 gap-6">
           {STEPS.map((step, i) => (
             <div key={i} className="bg-white rounded-2xl p-6 border border-gray-100 text-center space-y-3">
-              <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto">
+              <div className="w-12 h-12 rounded-xl bg-black/5 text-foreground flex items-center justify-center mx-auto">
                 {step.icon}
               </div>
-              <p className="text-xs font-bold text-blue-600 uppercase tracking-widest">Step {i + 1}</p>
+              <p className="text-xs font-bold text-muted uppercase tracking-widest">Step {i + 1}</p>
               <h3 className="font-bold text-gray-900">{step.title}</h3>
               <p className="text-sm text-gray-500 leading-relaxed">{step.body}</p>
             </div>

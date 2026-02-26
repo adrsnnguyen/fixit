@@ -92,15 +92,15 @@ export function calculateProviderPayout(subtotal: number): number {
 // Formatting helpers
 // ────────────────────────────────────────────────────────────────────────────
 
-const usdFormatter = new Intl.NumberFormat('en-US', {
+const cadFormatter = new Intl.NumberFormat('en-CA', {
   style: 'currency',
-  currency: 'USD',
+  currency: 'CAD',
   minimumFractionDigits: 2,
 })
 
-/** Format a number as a USD currency string, e.g. $1,234.56 */
+/** Format a number as a CAD currency string, e.g. CA$1,234.56 */
 export function formatPrice(amount: number): string {
-  return usdFormatter.format(amount)
+  return cadFormatter.format(amount)
 }
 
 /**

@@ -66,7 +66,7 @@ export function Step1Profile({ draft, onChange, onNext }: Step1Props) {
     if (!draft.full_name.trim()) return toast.error('Name is required')
     if (!draft.phone.trim()) return toast.error('Phone is required')
     if (!draft.primary_trade) return toast.error('Select your primary trade')
-    if (draft.service_zip_codes.length === 0) return toast.error('Add at least one zip code')
+    if (draft.service_zip_codes.length === 0) return toast.error('Add at least one postal code')
     onNext()
   }
 
@@ -126,7 +126,7 @@ export function Step1Profile({ draft, onChange, onNext }: Step1Props) {
             type="tel"
             value={draft.phone}
             onChange={(e) => onChange({ phone: e.target.value })}
-            placeholder="(555) 000-0000"
+            placeholder="(604) 555-0000"
             className="w-full px-4 py-3 rounded-xl border border-border bg-surface text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
           />
         </div>
@@ -165,16 +165,16 @@ export function Step1Profile({ draft, onChange, onNext }: Step1Props) {
         {/* Service zip codes */}
         <div>
           <label className="block text-sm font-medium text-foreground mb-1.5">
-            Service zip codes <span className="text-red-500">*</span>
+            Service postal codes <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
             value={zipInput}
             onChange={(e) => handleZipChange(e.target.value)}
-            placeholder="90210, 90211, 90212"
+            placeholder="V6B 2R9, V5K 1B3"
             className="w-full px-4 py-3 rounded-xl border border-border bg-surface text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
           />
-          <p className="text-xs text-muted mt-1">Comma-separated, up to 5 zip codes</p>
+          <p className="text-xs text-muted mt-1">Comma-separated, up to 5 postal codes</p>
         </div>
       </div>
 

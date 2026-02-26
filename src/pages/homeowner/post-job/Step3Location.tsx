@@ -10,8 +10,8 @@ interface Props {
 
 export function Step3Location({ draft, onChange, onNext, onBack }: Props) {
   const handleNext = () => {
-    if (!/^\d{5}$/.test(draft.zip_code)) {
-      return toast.error('Enter a valid 5-digit zip code')
+    if (!/^[A-Za-z]\d[A-Za-z] ?\d[A-Za-z]\d$/.test(draft.zip_code.trim())) {
+      return toast.error('Enter a valid postal code (e.g. V6B 2R9)')
     }
     onNext()
   }
@@ -41,15 +41,14 @@ export function Step3Location({ draft, onChange, onNext, onBack }: Props) {
       {/* Zip */}
       <div>
         <label className="block text-sm font-medium text-foreground mb-1.5">
-          Zip code <span className="text-red-500">*</span>
+          Postal code <span className="text-red-500">*</span>
         </label>
         <input
           type="text"
-          inputMode="numeric"
           value={draft.zip_code}
-          onChange={(e) => onChange({ zip_code: e.target.value.replace(/\D/g, '').slice(0, 5) })}
-          placeholder="78701"
-          maxLength={5}
+          onChange={(e) => onChange({ zip_code: e.target.value.replace(/[^A-Za-z0-9 ]/g, '').slice(0, 7).toUpperCase() })}
+          placeholder="V6B 2R9"
+          maxLength={7}
           className="w-full px-3 py-2.5 rounded-xl border border-border bg-background text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-sm"
         />
       </div>

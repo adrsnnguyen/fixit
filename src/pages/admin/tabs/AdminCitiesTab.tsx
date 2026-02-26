@@ -122,7 +122,7 @@ export function AdminCitiesTab() {
           />
           <input
             required
-            placeholder="State (e.g. TX)"
+            placeholder="Province (e.g. BC)"
             value={newState}
             onChange={(e) => setNewState(e.target.value)}
             className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"

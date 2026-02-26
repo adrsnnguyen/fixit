@@ -187,7 +187,7 @@ export default function HomeownerJobDetailPage() {
                 {formatPrice(job.ai_price_min_cents / 100)}–{formatPrice(job.ai_price_max_cents / 100)}
               </span>
             </span>
-            <span>Zip: <span className="font-medium text-foreground">{job.zip_code}</span></span>
+            <span>Postal code: <span className="font-medium text-foreground">{job.zip_code}</span></span>
           </div>
           {job.photos && job.photos.length > 0 && (
             <PhotoGallery photos={job.photos} alt="Job photo" />
